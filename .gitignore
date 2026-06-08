@@ -1,0 +1,19 @@
+# Virtual environment
+venv/
+
+# Data files - too large for git
+data/
+
+# Logs
+logs/
+
+# Python cache
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Environment variables
+config/.env
+
+# Jupyter
+.ipynb_checkpoints/
