@@ -23,7 +23,7 @@ Python · PySpark · Delta Lake · AWS S3 · Databricks · Apache Airflow · Gre
 
 ## Status
 - [x] Bronze ingestion — 70 files, 3.8M rows, 9 snapshots
-- [ ] Silver transformation
-- [ ] Gold modeling
+- [x] Silver transformation
+- [x] Gold modeling
 - [ ] Databricks integration
 - [ ] AWS S3 integration
