@@ -14,6 +14,10 @@ __pycache__/
 
 # Environment variables
 config/.env
+*_accessKeys.csv
+
+# Captured command output
+latest_run.txt
 
 # Jupyter
 .ipynb_checkpoints/
