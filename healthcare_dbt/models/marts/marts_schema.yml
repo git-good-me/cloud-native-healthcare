@@ -1,0 +1,78 @@
+version: 2
+
+models:
+
+  - name: mart_hospital_performance
+    description: >
+      Business-level hospital performance metrics aggregated by state.
+      One row per state. Primary mart for geographic performance analysis.
+
+      Key metrics:
+        - avg_star_rating: average CMS star rating across all hospitals in state
+        - pct_high_rated: % of hospitals rated 4 or 5 stars
+        - avg_readmission_score: lower is better
+        - star_rating_rank: 1 = best state nationally (Utah)
+    columns:
+      - name: state
+        description: Two-letter US state code
+        data_tests:
+          - unique
+          - not_null
+      - name: total_hospitals
+        description: Count of hospitals in state
+        data_tests:
+          - not_null
+      - name: avg_star_rating
+        description: Average CMS star rating (1.0-5.0)
+      - name: pct_high_rated
+        description: Percentage of hospitals with 4 or 5 star rating
+      - name: star_rating_rank
+        description: State rank by avg star rating (1 = best)
+
+  - name: mart_readmission_metrics
+    description: >
+      Hospital-level readmission and quality metrics with national benchmarking.
+      One row per hospital. Used for identifying readmission risk.
+
+      Key metrics:
+        - readmission_avg_score: hospital's average readmission score
+        - readmission_vs_national: comparison to national average
+        - readmission_risk_flag: TRUE if hospital is a readmission concern
+    columns:
+      - name: readmission_risk_flag
+        description: TRUE if hospital has elevated readmission concern
+        data_tests:
+          - not_null
+      - name: readmission_vs_national
+        description: Worse than national / Better than national / At national average
+        data_tests:
+          - accepted_values:
+              values:
+                - 'Worse than national'
+                - 'Better than national'
+                - 'At national average'
+                - 'Unknown'
+
+  - name: mart_rating_trends
+    description: >
+      Hospital star rating trends across all 9 quarterly snapshots.
+      One row per hospital per snapshot. Used for time-series analysis.
+
+      Key metrics:
+        - rating_change: delta vs previous snapshot
+        - trend: Improving / Declining / Stable / First snapshot
+        - snapshots_above_avg: how many quarters hospital rated >= 4 stars
+    columns:
+      - name: hospital_id
+        description: CMS Certification Number
+        data_tests:
+          - not_null
+      - name: snapshot_date
+        description: Quarter of the CMS snapshot
+        data_tests:
+          - not_null
+      - name: trend
+        description: Rating trend vs previous snapshot
+        data_tests:
+          - accepted_values:
+              values: ['Improving', 'Declining', 'Stable', 'First snapshot']

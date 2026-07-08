@@ -1,0 +1,65 @@
+version: 2
+
+sources:
+  - name: gold
+    description: >
+      Gold layer tables in AWS Athena (healthcare_lakehouse database).
+      External tables over S3 Parquet files produced by the Silver → Gold pipeline.
+      s3://cloud-native-healthcare-gold/gold/pyspark/
+    database: awsdatacatalog
+    schema: healthcare_lakehouse
+    tables:
+
+      - name: dim_hospital
+        description: >
+          Dimension table — one row per hospital.
+          5,624 unique CMS-certified hospitals across 50 US states and territories.
+        columns:
+          - name: hospital_id
+            description: CMS Certification Number (CCN) — unique hospital identifier
+          - name: hospital_name
+            description: Official hospital name
+          - name: state
+            description: Two-letter state abbreviation (mixed case in source)
+          - name: zip
+            description: 5-digit ZIP code
+          - name: hospital_type
+            description: Acute Care, Critical Access, etc.
+          - name: hospital_overall_rating
+            description: CMS overall star rating (1-5), null if not rated
+
+      - name: fact_hospital_ratings
+        description: >
+          Star ratings across 9 quarterly snapshots (Jan 2024 – May 2026).
+          54,079 rows — one per hospital per snapshot.
+        columns:
+          - name: hospital_id
+            description: CMS Certification Number — FK to dim_hospital
+          - name: hospital_overall_rating
+            description: CMS overall star rating at this snapshot (1-5)
+          - name: snapshot_date
+            description: Quarter of the CMS data snapshot
+          - name: mort_better_pct
+            description: "Percentage of mortality measures better than national rate"
+          - name: readm_better_pct
+            description: "Percentage of readmission measures better than national rate"
+
+      - name: gold_hospital_scorecard
+        description: >
+          Wide denormalised scorecard — one row per hospital combining all Gold metrics.
+          5,624 rows. Primary table for BI and Athena analytics.
+        columns:
+          - name: hospital_id
+            description: CMS Certification Number — unique per row
+          - name: hospital_overall_rating
+            description: CMS overall star rating (1-5)
+          - name: performance_tier
+            description: High / Medium / Low classification based on composite score
+          - name: readmission_avg_score
+            description: Average readmission score across measures (lower = better)
+          - name: complications_avg_score
+            description: Average complication score across measures
+          - name: infections_avg_score
+            description: Average HAI score (Standardised Infection Ratio)
+          - name: overall_hcahps_star_rating
+            description: Patient satisfaction star rating from HCAHPS surveys

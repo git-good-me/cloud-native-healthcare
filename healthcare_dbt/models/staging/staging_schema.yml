@@ -1,0 +1,68 @@
+version: 2
+
+models:
+
+  - name: stg_dim_hospital
+    description: >
+      Cleaned and typed staging view over Gold dim_hospital.
+      State codes uppercased, nulls filtered, types enforced.
+    columns:
+      - name: hospital_id
+        description: CMS Certification Number — primary key
+        data_tests:
+          - unique
+          - not_null
+      - name: hospital_name
+        description: Official hospital name
+        data_tests:
+          - not_null
+      - name: state
+        description: Uppercased 2-letter state code
+        data_tests:
+          - not_null
+      - name: zip_code
+        description: 5-digit ZIP code
+      - name: hospital_type
+        description: CMS hospital type classification
+
+  - name: stg_fact_hospital_ratings
+    description: >
+      Cleaned staging view over Gold fact_hospital_ratings.
+      Invalid star ratings coerced to null via try_cast.
+    columns:
+      - name: hospital_id
+        description: CMS Certification Number — FK to stg_dim_hospital
+        data_tests:
+          - not_null
+      - name: star_rating
+        description: CMS overall star rating (1-5), null if not rated
+        data_tests:
+          - accepted_values:
+              values: [1, 2, 3, 4, 5]
+              quote: false
+              config:
+                where: "star_rating is not null"
+      - name: snapshot_date
+        description: Quarter of the CMS data snapshot
+        data_tests:
+          - not_null
+
+  - name: stg_hospital_scorecard
+    description: >
+      Cleaned staging view over Gold hospital scorecard.
+      All metric columns cast to double, state uppercased.
+    columns:
+      - name: hospital_id
+        description: CMS Certification Number — primary key
+        data_tests:
+          - unique
+          - not_null
+      - name: star_rating
+        description: CMS overall star rating (1-5)
+      - name: performance_tier
+        description: "Unrated / High Performing / Average / Below Average"
+        data_tests:
+          - accepted_values:
+              values: ["Unrated", "High Performing", "Average", "Below Average"]
+              config:
+                where: "performance_tier is not null"
